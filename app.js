@@ -204,6 +204,10 @@ class UI {
     static checkValues(id) {
         return document.querySelector(`#${id}-title`).value === '' || document.querySelector(`#${id}-value`).value === '' || parseInt(document.querySelector(`#${id}-value`).value) <= 0
     }
+    static validate(text) {
+        const pattern = /^[^-\s][a-zA-Z\s\-\_]{2,24}$/
+        return pattern.test(text)
+    }
     static showAlert(formId, msg, className) {
         // Message Div
         const div = document.createElement('div');
@@ -236,6 +240,16 @@ class UI {
 
         return 1
     }
+    static clearFields(id) {
+        document.querySelector(`#${id}-title`).value = ''
+        document.querySelector(`#${id}-value`).value = ''
+    }
+    static collectValues(id) {
+        const title = document.querySelector(`#${id}-title`).value
+        const value = document.querySelector(`#${id}-value`).value
+
+        return { title, value }
+    }
 }
 
 
@@ -258,13 +272,33 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 
+document.querySelectorAll('.title').forEach((formTitleInput) => {
+    formTitleInput.addEventListener('keyup', (e) => {
+        const titleText = e.target.value
+        if (titleText.length === 0) {
+            e.target.classList.remove('invalid')
+            e.target.classList.remove('valid')
+            return
+        }
+        if (UI.validate(titleText)) {
+            e.target.classList.add('valid')
+            e.target.classList.remove('invalid')
+        }
+        if (!UI.validate(titleText)) {
+            e.target.classList.add('invalid')
+            e.target.classList.remove('valid')
+            return
+        }
+    })
+})
+
 // Event: Add an Expense
 document.querySelector('#expense-form').addEventListener('submit', (e) => {
     e.preventDefault()
 
     // Expense Details
-    const title = document.querySelector('#expense-title').value
-    const value = document.querySelector('#expense-value').value
+    const { title } = UI.collectValues('expense')
+    const { value } = UI.collectValues('expense')
 
 
 
@@ -273,20 +307,20 @@ document.querySelector('#expense-form').addEventListener('submit', (e) => {
 
     // Check for existing expense title
     const expenses = Store.getExpenses()
-    if (expenses.some((expense) => expense.title.toLowerCase() === title.toLowerCase())) {
-        UI.showAlert('expense', 'income title already exists', 'danger')
+    if (expenses.some((expense) => expense.title.toLowerCase() === title.toLowerCase().trim().replace(/\s+/g, " "))) {
+        UI.showAlert('expense', 'expense title already exists', 'danger')
         return
     }
     // Validate title and value
-    if (UI.checkValues('expense')) {
+    if (UI.checkValues('expense') || !UI.validate(title)) {
         UI.showAlert('expense', 'Missing title/value or negative amount', 'danger')
         return
-    } else {
+    }
+    else {
         UI.showAlert('expense', 'expense added', 'success')
 
         // Vanish expense form values
-        document.querySelector('#expense-title').value = ''
-        document.querySelector('#expense-value').value = ''
+        UI.clearFields('expense')
 
         // Add expense to list
         UI.addExpenseToList(expense)
@@ -330,12 +364,12 @@ document.querySelector('#income-form').addEventListener('submit', (e) => {
     e.preventDefault()
 
     // Income Details
-    const title = document.querySelector('#income-title').value
-    const value = document.querySelector('#income-value').value
+    const { title } = UI.collectValues('income')
+    const { value } = UI.collectValues('income')
 
     // Check for existing income title
     const incomes = Store.getIncomes()
-    if (incomes.some((income) => income.title.toLowerCase() === title.toLowerCase())) {
+    if (incomes.some((income) => income.title.toLowerCase() === title.toLowerCase().trim().replace(/\s+/g, " "))) {
         UI.showAlert('income', 'income title already exists', 'danger')
         return
     }
@@ -344,7 +378,8 @@ document.querySelector('#income-form').addEventListener('submit', (e) => {
     const income = new Income(title, value, Date.now())
 
     // Validate title and value
-    if (UI.checkValues('income')) {
+    if (UI.checkValues('income') || !UI.validate(title)) {
+        console.log(UI.validate(title));
         UI.showAlert('income', 'Missing title/value or negative amount', 'danger')
         return
     } else {
@@ -352,8 +387,7 @@ document.querySelector('#income-form').addEventListener('submit', (e) => {
         UI.showAlert('income', 'income added', 'success')
 
         // Vanish income form values
-        document.querySelector('#income-title').value = ''
-        document.querySelector('#income-value').value = ''
+        UI.clearFields('income')
 
         // Add income to list
         UI.addIncomeToList(income)
@@ -370,6 +404,8 @@ document.querySelector('#income-form').addEventListener('submit', (e) => {
         UI.displayBalance()
     }
 })
+
+
 
 // Event: Remove an Income
 document.querySelector('#income-table').addEventListener('click', (e) => {
