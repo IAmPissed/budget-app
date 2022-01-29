@@ -59,6 +59,14 @@
 			.btn:active {
 				transform: scale(0.98);
 			}
+			.valid.form-control:focus {
+				border-color: hsl(134, 61%, 41%);
+				box-shadow: 0 0 0 0.2rem hsla(134, 61%, 41%, 0.25);
+			}
+			.invalid.form-control:focus {
+				border-color: hsl(354, 70%, 54%);
+				box-shadow: 0 0 0 0.2rem hsla(354, 70%, 54%, 0.25);
+			}
 		</style>
 		<script src="app.js" defer></script>
 	</head>
@@ -108,8 +116,9 @@
 								<div class="form-group">
 									<input
 										type="text"
-										class="form-control budget-input mb-3"
+										class="form-control budget-input mb-1 title"
 										id="income-title"
+										autocomplete="off"
 									/>
 									<h5>Enter Income Amount</h5>
 									<input
@@ -168,8 +177,9 @@
 								<div class="form-group">
 									<input
 										type="text"
-										class="form-control expense-input mb-3"
+										class="form-control expense-input mb-3 title"
 										id="expense-title"
+										autocomplete="off"
 									/>
 								</div>
 								<h5 class="text-capitalize">please enter expense amount</h5>
