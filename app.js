@@ -205,7 +205,7 @@ class UI {
         return document.querySelector(`#${id}-title`).value === '' || document.querySelector(`#${id}-value`).value === '' || parseInt(document.querySelector(`#${id}-value`).value) <= 0
     }
     static validate(text) {
-        const pattern = /^[^-\s][a-zA-Z\s\-\_]{2,24}$/
+        const pattern = /^[^\s0-9\.\\\/\|\!\~\@\#\$\%\^\&\*\(\)\\+\=\]\[\{\}\'\"\:\;\?\<\>\,]+[a-zA-Z\-\_\s]{2,24}$/
         return pattern.test(text)
     }
     static showAlert(formId, msg, className) {
@@ -283,6 +283,7 @@ document.querySelectorAll('.title').forEach((formTitleInput) => {
         if (UI.validate(titleText)) {
             e.target.classList.add('valid')
             e.target.classList.remove('invalid')
+            return
         }
         if (!UI.validate(titleText)) {
             e.target.classList.add('invalid')
@@ -379,7 +380,6 @@ document.querySelector('#income-form').addEventListener('submit', (e) => {
 
     // Validate title and value
     if (UI.checkValues('income') || !UI.validate(title)) {
-        console.log(UI.validate(title));
         UI.showAlert('income', 'Missing title/value or negative amount', 'danger')
         return
     } else {
